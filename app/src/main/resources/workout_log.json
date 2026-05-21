@@ -1,0 +1,110 @@
+[
+    {
+        "exercise": "Bench Press",
+        "muscleGroup": "Chest",
+        "sets": 4,
+        "reps": 10,
+        "weightKg": 40.0,
+        "date": "2026-01-15",
+        "completed": true
+    },
+    {
+        "exercise": "Bench Press",
+        "muscleGroup": "Chest",
+        "sets": 4,
+        "reps": 10,
+        "weightKg": 50.0,
+        "date": "2026-03-01",
+        "completed": true
+    },
+    {
+        "exercise": "Bench Press",
+        "muscleGroup": "Chest",
+        "sets": 4,
+        "reps": 12,
+        "weightKg": 55.0,
+        "date": "2026-05-01",
+        "completed": true
+    },
+    {
+        "exercise": "Squat",
+        "muscleGroup": "Legs",
+        "sets": 5,
+        "reps": 5,
+        "weightKg": 60.0,
+        "date": "2026-01-15",
+        "completed": true
+    },
+    {
+        "exercise": "Squat",
+        "muscleGroup": "Legs",
+        "sets": 5,
+        "reps": 5,
+        "weightKg": 80.0,
+        "date": "2026-03-10",
+        "completed": true
+    },
+    {
+        "exercise": "Squat",
+        "muscleGroup": "Legs",
+        "sets": 5,
+        "reps": 8,
+        "weightKg": 90.0,
+        "date": "2026-05-10",
+        "completed": true
+    },
+    {
+        "exercise": "Deadlift",
+        "muscleGroup": "Back",
+        "sets": 3,
+        "reps": 5,
+        "weightKg": 80.0,
+        "date": "2026-02-01",
+        "completed": true
+    },
+    {
+        "exercise": "Deadlift",
+        "muscleGroup": "Back",
+        "sets": 3,
+        "reps": 5,
+        "weightKg": 100.0,
+        "date": "2026-04-15",
+        "completed": true
+    },
+    {
+        "exercise": "Overhead Press",
+        "muscleGroup": "Shoulders",
+        "sets": 4,
+        "reps": 8,
+        "weightKg": 25.0,
+        "date": "2026-01-20",
+        "completed": true
+    },
+    {
+        "exercise": "Overhead Press",
+        "muscleGroup": "Shoulders",
+        "sets": 4,
+        "reps": 10,
+        "weightKg": 32.5,
+        "date": "2026-04-20",
+        "completed": false
+    },
+    {
+        "exercise": "Barbell Row",
+        "muscleGroup": "Back",
+        "sets": 4,
+        "reps": 8,
+        "weightKg": 50.0,
+        "date": "2026-02-10",
+        "completed": true
+    },
+    {
+        "exercise": "Barbell Row",
+        "muscleGroup": "Back",
+        "sets": 4,
+        "reps": 10,
+        "weightKg": 60.0,
+        "date": "2026-05-05",
+        "completed": true
+    }
+]
