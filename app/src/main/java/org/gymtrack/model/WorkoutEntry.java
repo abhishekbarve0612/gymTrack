@@ -72,10 +72,17 @@ public class WorkoutEntry {
         this.completed = completed;
     }
 
+    /**
+     * Training volume: sets x reps x weight
+     */
+    public double getVolume() {
+        return sets * reps * weightKg;
+    }
+
     @Override
     public String toString() {
         return String.format(
-                "Exercise: %s | Muscle Group: %s | Sets: %d | Reps: %d | Weight: %.1fkg | Date: %s | Completed: %b",
-                exercise, muscleGroup, sets, reps, weightKg, date, completed);
+                "%s | %sx%s @ %.1fkg (%s)",
+                exercise, sets, reps, weightKg, date);
     }
 }
