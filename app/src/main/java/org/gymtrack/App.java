@@ -7,6 +7,7 @@ import java.util.*;
 import org.gymtrack.comparator.CategoryComparator;
 import org.gymtrack.comparator.MuscleCountComparator;
 import org.gymtrack.comparator.NameComparator;
+import org.gymtrack.model.OneRepMaxResult;
 import org.gymtrack.model.OverloadResult;
 import org.gymtrack.model.WgerExerciseInfo;
 import org.gymtrack.model.WorkoutEntry;
@@ -17,6 +18,7 @@ import org.gymtrack.provider.LocalExerciseProvider;
 import org.gymtrack.provider.WgerApiProvider;
 import org.gymtrack.provider.WorkoutDataProvider;
 import org.gymtrack.service.ExerciseApiClient;
+import org.gymtrack.service.OneRepMaxCalculator;
 import org.gymtrack.service.OverloadCalculator;
 
 public class App {
@@ -60,31 +62,32 @@ public class App {
         ExerciseApiClient client = new ExerciseApiClient();
 
         Set<String> uniqueNames = new LinkedHashSet<>();
-        for (WorkoutEntry e: log) uniqueNames.add(e.getExercise());
+        for (WorkoutEntry e : log)
+            uniqueNames.add(e.getExercise());
 
         List<WgerExerciseInfo> exercises = new ArrayList<>();
-        for (String name: uniqueNames) {
+        for (String name : uniqueNames) {
             System.out.println("Fetching exercise: " + name);
             WgerExerciseInfo info = client.fetchExerciseInfo(name);
-            if (info != null) exercises.add(info);
+            if (info != null)
+                exercises.add(info);
         }
 
         System.out.println("\n\n" + exercises.size() + " exercises found\n\n");
 
         exercises.sort(new MuscleCountComparator());
         System.out.println(" --- By muscle count (compound first) --- ");
-        for (WgerExerciseInfo ex: exercises) {
+        for (WgerExerciseInfo ex : exercises) {
             System.out.printf(
                     "   %d muscles  %s [%s]%n",
                     ex.getTotalMuscleCount(),
                     ex.getName(),
-                    ex.getCategory() != null ? ex.getCategory().getName() : "?"
-            );
+                    ex.getCategory() != null ? ex.getCategory().getName() : "?");
         }
 
         exercises.sort(new CategoryComparator());
         System.out.println(" --- By category --- ");
-        for (WgerExerciseInfo ex: exercises) {
+        for (WgerExerciseInfo ex : exercises) {
             System.out.printf(
                     "  %-12s  %s%n",
                     ex.getCategory() != null ? ex.getCategory().getName() : "?",
@@ -93,19 +96,18 @@ public class App {
 
         exercises.sort(new NameComparator());
         System.out.println(" --- By name --- ");
-        for (WgerExerciseInfo ex: exercises) {
+        for (WgerExerciseInfo ex : exercises) {
             System.out.println(" " + ex.getName());
         }
     }
 
     public static void calculateOverloadRates(
             WorkoutDataProvider provider,
-            List<WorkoutEntry> log
-    ) {
+            List<WorkoutEntry> log) {
         System.out.println("Provider: " + provider.getProviderName());
         Set<String> seen = new HashSet<>();
 
-        for (WorkoutEntry entry: log) {
+        for (WorkoutEntry entry : log) {
             if (seen.add(entry.getExercise())) {
                 WgerExerciseInfo info = provider.getExerciseDetails(entry.getExercise());
                 if (info != null) {
@@ -117,18 +119,35 @@ public class App {
         List<OverloadResult> results = OverloadCalculator.calculate(log);
         System.out.println("\n Ranked by Overload Rates:");
         int rank = 1;
-        for (OverloadResult result: results) {
+        for (OverloadResult result : results) {
             System.out.printf("  %d. %s%n"
-                            + "     Volume: %.0f → %.0f kg (%+.0f%%)%n"
-                            + "     Overload Rate: %+.1f%% annualized  (%d days)%n%n",
+                    + "     Volume: %.0f → %.0f kg (%+.0f%%)%n"
+                    + "     Overload Rate: %+.1f%% annualized  (%d days)%n%n",
                     rank++,
                     result.getExercise(),
                     result.getStartVolume(),
                     result.getEndVolume(),
                     result.getAbsoluteGain() * 100,
                     result.getOverloadRate() * 100,
-                    result.getDaysBetween()
-            );
+                    result.getDaysBetween());
+        }
+    }
+
+    public static void calculateOneRepMax(List<WorkoutEntry> log) {
+        List<OneRepMaxResult> results = OneRepMaxCalculator.calculate(log);
+
+        System.out.println("\n===== ESTIMATED 1-REP MAXES (Epley Formula) =====");
+        int rank = 1;
+        for (OneRepMaxResult result : results) {
+            System.out.printf("  %d. %s%n"
+                    + "     Best Set : %.1f kg × %d reps  (%s)%n"
+                    + "     Est. 1RM  : %.1f kg%n%n",
+                    rank++,
+                    result.getExercise(),
+                    result.getBestWeight(),
+                    result.getBestReps(),
+                    result.getDate(),
+                    result.getEstimatedOneRepMax());
         }
     }
 
@@ -136,14 +155,14 @@ public class App {
         try {
             List<WorkoutEntry> log = readLog("workout_log.json");
 
-//            printSummary(log);
+            // printSummary(log);
 
             System.out.println("============ All Entries ============");
 
-//            for (WorkoutEntry entry : log) {
-//                System.out.println(entry.toString());
-//
-//            }
+            // for (WorkoutEntry entry : log) {
+            // System.out.println(entry.toString());
+            //
+            // }
 
             fetchAndSortExercises(log);
 
@@ -154,6 +173,8 @@ public class App {
 
             calculateOverloadRates(wger, log);
             calculateOverloadRates(local, log);
+
+            calculateOneRepMax(log);
 
         } catch (IOException e) {
             System.err.println("Error reading workout log: " + e.getMessage());
