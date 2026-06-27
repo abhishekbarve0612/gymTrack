@@ -8,41 +8,24 @@ import org.springframework.web.client.RestTemplate;
 
 public class ExerciseApiClient {
 
-    private final RestTemplate restTemplate;
+    private final RestTemplate rest = new RestTemplate();
     private static final String BASE_URL = "https://wger.de/api/v2";
 
-    private static final Map<String, Integer> EXERCISE_IDS = new HashMap<>();
-
-    static {
-        EXERCISE_IDS.put("Bench Press", 192);
-        EXERCISE_IDS.put("Squat", 365);
-        EXERCISE_IDS.put("Deadlift", 105);
-        EXERCISE_IDS.put("Overhead Press", 119);
-        EXERCISE_IDS.put("Barbell Row", 106);
-    }
-
-    public ExerciseApiClient() {
-        this.restTemplate = new RestTemplate();
-    }
+    private static final Map<String, Integer> EXERCISE_IDS = Map.of(
+            "Bench Press", 73,
+            "Squat", 1801,
+            "Deadlift", 184,
+            "Overhead Press", 687,
+            "Barbell Row", 1698
+    );
 
     public WgerExerciseInfo fetchExerciseInfo(String exerciseName) {
         Integer id = EXERCISE_IDS.get(exerciseName);
-
         if (id == null) {
-            System.out.println("Exercise not found: " + exerciseName);
+            System.out.println("Unknown exercise: " + exerciseName);
             return null;
         }
-
         String url = BASE_URL + "/exerciseinfo/" + id + "/?format=json";
-        System.out.println("Fetching: " + url);
-
-        return restTemplate.getForObject(url, WgerExerciseInfo.class);
-    }
-
-    public WgerExerciseInfo fetchById(int id) {
-        String url = BASE_URL + "/exerciseinfo/" + id + "/?format=json";
-        System.out.println("Fetching: " + url);
-
-        return restTemplate.getForObject(url, WgerExerciseInfo.class);
+        return rest.getForObject(url, WgerExerciseInfo.class);
     }
 }

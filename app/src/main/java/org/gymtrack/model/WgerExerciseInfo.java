@@ -1,49 +1,44 @@
 package org.gymtrack.model;
 
-import java.util.List;
-
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import com.fasterxml.jackson.annotation.JsonProperty;
 
-@JsonIgnoreProperties(ignoreUnknown = true)
-public class WgerExerciseInfo {
+import java.util.List;
 
-    private int id;
+@JsonIgnoreProperties(ignoreUnknown = true)
+public  class WgerExerciseInfo {
+
     private String name;
-    private String description;
+    private List<WgerTranslation> translations;
     private WgerCategory category;
     private List<WgerMuscle> muscles;
 
     @JsonProperty("muscles_secondary")
     private List<WgerMuscle> musclesSecondary;
 
-    private List<WgerEquipment> equipment;
+    private List<WgerEquipment> equipments;
 
-    public WgerExerciseInfo() {
-    }
-
-    public int getId() {
-        return id;
-    }
-
-    public void setId(int id) {
-        this.id = id;
-    }
+    public WgerExerciseInfo() {}
 
     public String getName() {
-        return name;
+        if (name != null) return name;
+        if (translations != null) {
+            for (WgerTranslation t: translations) {
+                if (t.getLanguage() == 2) return t.getName(); // 2 -> English
+            }
+            if (!translations.isEmpty()) return translations.getFirst().getName();
+        }
+        return null;
     }
 
-    public void setName(String name) {
-        this.name = name;
+    public void setName(String name) { this.name = name; }
+
+    public List<WgerTranslation> getTranslations() {
+        return translations;
     }
 
-    public String getDescription() {
-        return description;
-    }
-
-    public void setDescription(String description) {
-        this.description = description;
+    public void setTranslations(List<WgerTranslation> translations) {
+        this.translations = translations;
     }
 
     public WgerCategory getCategory() {
@@ -70,26 +65,25 @@ public class WgerExerciseInfo {
         this.musclesSecondary = musclesSecondary;
     }
 
-    public List<WgerEquipment> getEquipment() {
-        return equipment;
+    public List<WgerEquipment> getEquipments() {
+        return equipments;
     }
 
-    public void setEquipment(List<WgerEquipment> equipment) {
-        this.equipment = equipment;
+    public void setEquipments(List<WgerEquipment> equipments) {
+        this.equipments = equipments;
     }
 
     public int getTotalMuscleCount() {
         int count = 0;
-        if (muscles != null)
-            count += muscles.size();
-        if (musclesSecondary != null)
-            count += musclesSecondary.size();
+        if (muscles != null) count += muscles.size();
+        if (musclesSecondary != null) count += musclesSecondary.size();
         return count;
     }
 
     @Override
-    public String toString() {
-        return String.format("%s (%s) - %d muscles", name, (category != null ? category.getName() : "??"),
-                getTotalMuscleCount());
+    public  String toString() {
+        return getName() + " ("
+                + (category != null ? category.getName() : ":")
+                + ") - " + getTotalMuscleCount() + " muscles";
     }
 }
