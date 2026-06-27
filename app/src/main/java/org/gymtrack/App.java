@@ -7,12 +7,17 @@ import java.util.*;
 import org.gymtrack.comparator.CategoryComparator;
 import org.gymtrack.comparator.MuscleCountComparator;
 import org.gymtrack.comparator.NameComparator;
+import org.gymtrack.model.OverloadResult;
 import org.gymtrack.model.WgerExerciseInfo;
 import org.gymtrack.model.WorkoutEntry;
 
 import com.fasterxml.jackson.core.type.TypeReference;
 import com.fasterxml.jackson.databind.ObjectMapper;
+import org.gymtrack.provider.LocalExerciseProvider;
+import org.gymtrack.provider.WgerApiProvider;
+import org.gymtrack.provider.WorkoutDataProvider;
 import org.gymtrack.service.ExerciseApiClient;
+import org.gymtrack.service.OverloadCalculator;
 
 public class App {
 
@@ -21,9 +26,9 @@ public class App {
         InputStream is = App.class.getClassLoader().getResourceAsStream((filename));
 
         if (is == null) {
-            throw new IOException(("File not fofund: " + filename));
+            throw new IOException(("File not found: " + filename));
         }
-        return mapper.readValue(is, new TypeReference<List<WorkoutEntry>>() {
+        return mapper.readValue(is, new TypeReference<>() {
         });
     }
 
@@ -93,6 +98,40 @@ public class App {
         }
     }
 
+    public static void calculateOverloadRates(
+            WorkoutDataProvider provider,
+            List<WorkoutEntry> log
+    ) {
+        System.out.println("Provider: " + provider.getProviderName());
+        Set<String> seen = new HashSet<>();
+
+        for (WorkoutEntry entry: log) {
+            if (seen.add(entry.getExercise())) {
+                WgerExerciseInfo info = provider.getExerciseDetails(entry.getExercise());
+                if (info != null) {
+                    System.out.println("     -> " + info);
+                }
+            }
+        }
+
+        List<OverloadResult> results = OverloadCalculator.calculate(log);
+        System.out.println("\n Ranked by Overload Rates:");
+        int rank = 1;
+        for (OverloadResult result: results) {
+            System.out.printf("  %d. %s%n"
+                            + "     Volume: %.0f → %.0f kg (%+.0f%%)%n"
+                            + "     Overload Rate: %+.1f%% annualized  (%d days)%n%n",
+                    rank++,
+                    result.getExercise(),
+                    result.getStartVolume(),
+                    result.getEndVolume(),
+                    result.getAbsoluteGain() * 100,
+                    result.getOverloadRate() * 100,
+                    result.getDaysBetween()
+            );
+        }
+    }
+
     public static void main(String[] args) {
         try {
             List<WorkoutEntry> log = readLog("workout_log.json");
@@ -109,6 +148,12 @@ public class App {
             fetchAndSortExercises(log);
 
             System.out.println("==================================");
+
+            WorkoutDataProvider wger = new WgerApiProvider();
+            WorkoutDataProvider local = new LocalExerciseProvider(log);
+
+            calculateOverloadRates(wger, log);
+            calculateOverloadRates(local, log);
 
         } catch (IOException e) {
             System.err.println("Error reading workout log: " + e.getMessage());
